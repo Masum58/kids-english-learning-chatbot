@@ -142,6 +142,8 @@ async def handle_message(db: Session, session_id: str, text: str) -> ChatResult:
 
         else:  # conversation
             if reason == mode_router.CHAT_OPENER:
+                state.pending_question_id = None
+                state.attempts = 0
                 reply, buttons = sel.CHAT_OPENER, ["📚 Learn", "🎮 Play"]
             elif reason == "change_topic":
                 state.pending_question_id = None

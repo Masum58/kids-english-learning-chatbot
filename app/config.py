@@ -19,8 +19,8 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://chatbot:chatbot@localhost:5432/chatbot"
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash-lite"
-    llm_timeout_seconds: float = 1.3
+    gemini_model: str = "gemini-3.5-flash-lite"
+    llm_timeout_seconds: float = 1.5
 
     @property
     def sqlalchemy_url(self) -> str:

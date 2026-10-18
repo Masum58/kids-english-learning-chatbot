@@ -53,8 +53,8 @@ LEARN_WORDS = ("teach", "learn", "lean", "learning", "lesson", "quiz", "practice
 GREETINGS = {"hi", "hello", "hey", "hi there", "hello there", "hey there",
              "good morning", "good afternoon", "good evening"}
 CHAT_OPENERS = {"chat", "lets chat"}
-QUESTION_WORDS = {"why", "how", "who", "where", "when"}
-TOPIC_CHANGE_WORDS = ("change topic", "change the topic", "something else", "talk about", "are you there", "hello teddy")
+QUESTION_WORDS = {"why", "how", "who", "where", "when", "what", "which", "if", "can", "could", "tell"}
+TOPIC_CHANGE_WORDS = ("change topic", "change the topic", "something else", "talk about", "are you there", "hello teddy", "stop", "no more", "different topic", "play something else")
 FRIENDLY_CHECK_IN_WORDS = ("how are you", "how do you feel", "are you happy")
 
 _engine = LearningEngine()
@@ -132,14 +132,6 @@ def detect(text: str, state: LearnerState, previous_mode: str = CONVERSATION) ->
         return _answer(state, previous_mode)
 
     # 4. intent
-    if _has(t, ENGAGEMENT_WORDS) or ("again" in tokens and previous_mode == ENGAGEMENT):
-        return Decision(ENGAGEMENT, "wants_to_play")
-    # A child often answers a game prompt with only "yes". Keep the play context;
-    # do not unexpectedly turn this into a lesson.
-    if previous_mode == ENGAGEMENT and words in PLAY_CONTINUATIONS:
-        return Decision(ENGAGEMENT, "continues_play")
-    if _has(t, LEARN_WORDS):
-        return Decision(LEARNING, "wants_to_learn")
     if _has(t, TOPIC_CHANGE_WORDS):
         return Decision(CONVERSATION, "change_topic")
     if _has(t, FRIENDLY_CHECK_IN_WORDS):
@@ -150,6 +142,14 @@ def detect(text: str, state: LearnerState, previous_mode: str = CONVERSATION) ->
         return Decision(CONVERSATION, CHAT_OPENER)
     if "?" in text or (tokens and tokens[0] in QUESTION_WORDS):
         return Decision(CONVERSATION, "child_question")
+    if _has(t, ENGAGEMENT_WORDS) or ("again" in tokens and previous_mode == ENGAGEMENT):
+        return Decision(ENGAGEMENT, "wants_to_play")
+    # A child often answers a game prompt with only "yes". Keep the play context;
+    # do not unexpectedly turn this into a lesson.
+    if previous_mode == ENGAGEMENT and words in PLAY_CONTINUATIONS:
+        return Decision(ENGAGEMENT, "continues_play")
+    if _has(t, LEARN_WORDS):
+        return Decision(LEARNING, "wants_to_learn")
     if _has(t, POSITIVE):
         return Decision(CONVERSATION, "emotion:happy", emotion="happy")
 
