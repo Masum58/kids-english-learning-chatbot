@@ -82,7 +82,10 @@ async def handle_message(db: Session, session_id: str, text: str) -> ChatResult:
             if reason == mode_router.CHAT_OPENER:
                 reply, buttons = sel.CHAT_OPENER, ["📚 Learn", "🎮 Play"]
             elif reason == mode_router.GREETING:
-                reply, buttons = _with_menu(sel.GREETING, state)
+                if state.pending_question_id:
+                    reply, buttons = "Hi again! 👋 Want to keep practicing or play a game?", sel.menu(True)
+                else:
+                    reply, buttons = sel.GREETING, sel.menu(False)
             else:
                 reply, llm_used = await _talk("conversation", text, state, row, d.emotion)
                 reply, buttons = _with_menu(reply, state)

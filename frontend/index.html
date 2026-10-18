@@ -23,7 +23,7 @@
           <h1 id="welcome-title">Let’s learn and play!</h1>
           <p class="hero-copy">Teddy helps curious little learners build English confidence, one happy step at a time.</p>
         </div>
-        <div class="hero-art" aria-hidden="true"><span class="sun">☀️</span><span class="cloud cloud-one">☁️</span><span class="cloud cloud-two">☁️</span><span class="bear">🧸</span></div>
+        <div class="hero-art" aria-hidden="true"><span class="sun">☀️</span><span class="cloud cloud-one">☁️</span><span class="cloud cloud-two">☁️</span><span class="bear" id="hero-bear">🧸</span></div>
       </section>
 
       <section class="progress-card" aria-label="Learning progress">
@@ -33,7 +33,12 @@
       </section>
 
       <section class="chat-card" aria-label="Chat with Teddy">
-        <div class="chat-header"><div class="teddy-avatar">🧸</div><div><h2>Teddy</h2><p><i></i> Ready to learn with you</p></div></div>
+        <div class="chat-header"><div class="teddy-avatar" id="teddy-avatar">🧸</div><div><h2>Teddy</h2><p id="teddy-status"><i></i> Ready to learn with you</p></div><button class="listen-button" id="listen-button" type="button" aria-label="Listen to Teddy" title="Listen to Teddy">🔊</button></div>
+        <section class="activity-stage" id="activity-stage" hidden aria-live="polite">
+          <p class="activity-kicker">TEDDY’S LEARNING QUEST</p>
+          <div class="activity-copy" id="activity-copy"></div>
+          <div class="activity-choices" id="activity-choices" aria-label="Choose an answer"></div>
+        </section>
         <div class="messages" id="messages" aria-live="polite">
           <article class="message teddy-message">Hi, friend! 👋 I’m Teddy. What would you like to do today?</article>
         </div>
@@ -50,6 +55,7 @@
         <p class="helper-text">Teddy is for learning. Please don’t share private details. 💛</p>
       </section>
     </main>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
     <div class="toast" id="toast" role="status"></div>
     <script src="app.js"></script>
   </body>

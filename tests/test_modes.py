@@ -49,3 +49,8 @@ def test_struggling_child_gets_support_once():
 def test_again_repeats_the_game_only_after_a_game():
     assert detect("🔁 Again", st(), "engagement").mode == "engagement"
     assert detect("🔁 Again", st(), "learning").mode == "learning"
+
+
+def test_yes_keeps_a_child_in_the_current_game():
+    decision = detect("yes", st(), "engagement")
+    assert decision.mode == "engagement" and decision.reason == "continues_play"

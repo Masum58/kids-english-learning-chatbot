@@ -24,6 +24,7 @@ NEGATIVE_EMOTIONS = {
 POSITIVE = ("happy", "excited", "yay", "great")
 STUCK = ("dont know", "idk", "dunno", "cant", "too hard", "help", "dont understand", "dont get it")
 ENGAGEMENT_WORDS = ("play", "game", "fun", "song", "sing", "rhyme", "joke", "bored", "dance")
+PLAY_CONTINUATIONS = {"yes", "yeah", "yep", "ok", "okay", "more", "again"}
 LEARN_WORDS = ("teach", "learn", "learning", "lesson", "quiz", "practice", "next", "start",
                "continue", "more", "yes", "yeah", "ok", "okay", "again")
 GREETINGS = {"hi", "hello", "hey", "hi there", "hello there", "hey there",
@@ -84,6 +85,10 @@ def detect(text: str, state: LearnerState, previous_mode: str = CONVERSATION) ->
     # 4. intent
     if _has(t, ENGAGEMENT_WORDS) or ("again" in tokens and previous_mode == ENGAGEMENT):
         return Decision(ENGAGEMENT, "wants_to_play")
+    # A child often answers a game prompt with only "yes". Keep the play context;
+    # do not unexpectedly turn this into a lesson.
+    if previous_mode == ENGAGEMENT and words in PLAY_CONTINUATIONS:
+        return Decision(ENGAGEMENT, "continues_play")
     if _has(t, LEARN_WORDS):
         return Decision(LEARNING, "wants_to_learn")
     if words in GREETINGS:
