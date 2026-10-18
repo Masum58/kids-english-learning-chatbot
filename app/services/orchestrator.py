@@ -55,6 +55,9 @@ async def handle_message(db: Session, session_id: str, text: str) -> ChatResult:
         mode, reason = "conversation", "privacy"
         reply, buttons = safety.PRIVACY_REPLY, sel.menu(False)
         stored_text = "[removed for privacy]"
+    elif flag == "memory_question":
+        mode, reason = "conversation", "privacy_memory"
+        reply, buttons = safety.MEMORY_REPLY, sel.menu(False)
     else:
         d = mode_router.detect(text, state, previous_mode)
         mode, reason = d.mode, d.reason
@@ -81,6 +84,12 @@ async def handle_message(db: Session, session_id: str, text: str) -> ChatResult:
         else:  # conversation
             if reason == mode_router.CHAT_OPENER:
                 reply, buttons = sel.CHAT_OPENER, ["📚 Learn", "🎮 Play"]
+            elif reason == "change_topic":
+                state.pending_question_id = None
+                state.attempts = 0
+                reply, buttons = "Sure! 😊 What would you like to do now?", sel.menu(False)
+            elif reason == "friendly_check_in":
+                reply, buttons = "I'm happy to learn with you! 😊 How are you feeling today?", sel.menu(bool(state.pending_question_id))
             elif reason == mode_router.GREETING:
                 if state.pending_question_id:
                     reply, buttons = "Hi again! 👋 Want to keep practicing or play a game?", sel.menu(True)

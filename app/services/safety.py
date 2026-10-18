@@ -19,6 +19,13 @@ PERSONAL_PATTERNS = [re.compile(p) for p in (
     r"\S+@\S+\.\S+",                             # email
 )]
 
+MEMORY_QUESTION_PATTERNS = [re.compile(p) for p in (
+    r"\bwhat(?:'s| is| was) my name\b",
+    r"\bdo you remember my name\b",
+    r"\bdo you (?:remember|memorize) (?:anything|something)\b",
+    r"\bare you (?:remembering|memorizing|memorize) (?:anything|something)\b",
+)]
+
 UNSAFE_REPLY = (
     "I'm so glad you told me 💛 You are important.\n"
     "Please tell a grown-up you trust, like Mum, Dad or your teacher, right now. They can help you."
@@ -27,13 +34,19 @@ PRIVACY_REPLY = (
     "Thank you for telling me! 😊 But let's keep names, phone numbers and addresses a secret. 🤫\n"
     "Let's learn or play!"
 )
+MEMORY_REPLY = (
+    "I don't remember names or private things. 🤫 That helps keep you safe!\n"
+    "Would you like to learn or play?"
+)
 
 
 def check(text: str) -> str | None:
-    """'unsafe' | 'personal_info' | None"""
+    """'unsafe' | 'personal_info' | 'memory_question' | None"""
     t = text.lower().replace("’", "'")
     if any(p.search(t) for p in UNSAFE_PATTERNS):
         return "unsafe"
     if any(p.search(t) for p in PERSONAL_PATTERNS):
         return "personal_info"
+    if any(p.search(t) for p in MEMORY_QUESTION_PATTERNS):
+        return "memory_question"
     return None

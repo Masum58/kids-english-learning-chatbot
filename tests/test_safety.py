@@ -13,6 +13,11 @@ def test_personal_info(text):
     assert safety.check(text) == "personal_info"
 
 
+@pytest.mark.parametrize("text", ["What was my name?", "Do you remember my name?", "Are you memorize something?"])
+def test_memory_questions_get_privacy_response(text):
+    assert safety.check(text) == "memory_question"
+
+
 @pytest.mark.parametrize("text", ["Teach me animals", "I like my dog", "I am sad", "cat"])
 def test_normal_messages_pass(text):
     assert safety.check(text) is None

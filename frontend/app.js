@@ -1,4 +1,4 @@
-const API_URL = window.TEDDY_API_URL || "http://localhost:8000";
+const API_URL = window.TEDDY_API_URL || (window.location.protocol.startsWith("http") ? "" : "http://localhost:8000");
 const sessionKey = "teddy-english-session";
 let sessionId = localStorage.getItem(sessionKey) || null;
 
@@ -13,6 +13,7 @@ const teddyAvatar = document.querySelector("#teddy-avatar");
 const heroBear = document.querySelector("#hero-bear");
 const teddyStatus = document.querySelector("#teddy-status");
 const confetti = document.querySelector("#confetti");
+const freshButton = document.querySelector("#fresh-button");
 const activityStage = document.querySelector("#activity-stage");
 const activityCopy = document.querySelector("#activity-copy");
 const activityChoices = document.querySelector("#activity-choices");
@@ -174,4 +175,9 @@ async function sendMessage(rawMessage, isLessonChoice = false) {
 
 form.addEventListener("submit", (event) => { event.preventDefault(); sendMessage(input.value); });
 listenButton.addEventListener("click", speakLastReply);
+freshButton.addEventListener("click", () => {
+  sessionId = null;
+  localStorage.removeItem(sessionKey);
+  window.location.reload();
+});
 if ("speechSynthesis" in window) window.speechSynthesis.getVoices();

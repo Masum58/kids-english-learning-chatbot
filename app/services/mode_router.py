@@ -25,12 +25,14 @@ POSITIVE = ("happy", "excited", "yay", "great")
 STUCK = ("dont know", "idk", "dunno", "cant", "too hard", "help", "dont understand", "dont get it")
 ENGAGEMENT_WORDS = ("play", "game", "fun", "song", "sing", "rhyme", "joke", "bored", "dance")
 PLAY_CONTINUATIONS = {"yes", "yeah", "yep", "ok", "okay", "more", "again"}
-LEARN_WORDS = ("teach", "learn", "learning", "lesson", "quiz", "practice", "next", "start",
+LEARN_WORDS = ("teach", "learn", "lean", "learning", "lesson", "quiz", "practice", "next", "start",
                "continue", "more", "yes", "yeah", "ok", "okay", "again")
 GREETINGS = {"hi", "hello", "hey", "hi there", "hello there", "hey there",
              "good morning", "good afternoon", "good evening"}
 CHAT_OPENERS = {"chat", "lets chat"}
 QUESTION_WORDS = {"why", "how", "who", "where", "when"}
+TOPIC_CHANGE_WORDS = ("change topic", "change the topic", "something else", "talk about", "are you there", "hello teddy")
+FRIENDLY_CHECK_IN_WORDS = ("how are you", "how do you feel", "are you happy")
 
 _engine = LearningEngine()
 
@@ -91,6 +93,10 @@ def detect(text: str, state: LearnerState, previous_mode: str = CONVERSATION) ->
         return Decision(ENGAGEMENT, "continues_play")
     if _has(t, LEARN_WORDS):
         return Decision(LEARNING, "wants_to_learn")
+    if _has(t, TOPIC_CHANGE_WORDS):
+        return Decision(CONVERSATION, "change_topic")
+    if _has(t, FRIENDLY_CHECK_IN_WORDS):
+        return Decision(CONVERSATION, "friendly_check_in")
     if words in GREETINGS:
         return Decision(CONVERSATION, GREETING)
     if words in CHAT_OPENERS:
@@ -100,8 +106,9 @@ def detect(text: str, state: LearnerState, previous_mode: str = CONVERSATION) ->
     if _has(t, POSITIVE):
         return Decision(CONVERSATION, "emotion:happy", emotion="happy")
 
-    # 5. proshno pending, choto message: uttor dhorbo
-    if q and t and len(t.split()) <= 5:
+    # 5. Pending question er somoy ek-word/dui-word response answer hote pare.
+    # Boro message ke vul kore answer dhorle "are you there?"-er moto normal chat haray jay.
+    if q and t and len(t.split()) <= 2:
         return _answer(state, previous_mode)
 
     return Decision(CONVERSATION, "general_chat")

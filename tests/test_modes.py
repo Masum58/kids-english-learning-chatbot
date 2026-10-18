@@ -10,6 +10,8 @@ def st(pending=None, last=None):
 
 @pytest.mark.parametrize("text,pending,expected", [
     ("Teach me animals", None, "learning"),
+    ("I want lean new things from AI", None, "learning"),
+    ("Hello, how are you?", None, "conversation"),
     ("Why is the sky blue?", None, "conversation"),
     ("Let's play a game!", None, "engagement"),
     ("I am sad", None, "support"),
@@ -38,6 +40,7 @@ def test_answer_flag():
 def test_every_decision_has_a_reason():
     assert detect("I am sad", st()).reason == "emotion:sad"
     assert detect("hi", st()).reason == "greeting"
+    assert detect("hello how are you", st()).reason == "friendly_check_in"
 
 
 def test_struggling_child_gets_support_once():
@@ -54,3 +57,9 @@ def test_again_repeats_the_game_only_after_a_game():
 def test_yes_keeps_a_child_in_the_current_game():
     decision = detect("yes", st(), "engagement")
     assert decision.mode == "engagement" and decision.reason == "continues_play"
+
+
+@pytest.mark.parametrize("text", ["are you there", "let's change topic", "let's change the topic", "something else"])
+def test_conversation_does_not_be_graded_as_a_pending_answer(text):
+    decision = detect(text, st("l1_cat"), "learning")
+    assert decision.mode == "conversation"
