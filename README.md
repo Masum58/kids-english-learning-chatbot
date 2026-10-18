@@ -244,8 +244,7 @@ As requested in the project brief, repository collaboration access is configured
 ## 🎥 2-Minute Video Presentation
 
 A concise walkthrough video covering problem statement, pedagogical architecture, child safety, SEL, latency trade-offs, and live demo is available at:
-- **Presentation Link**: *(Add your video presentation link here)*
-- **Script & Slide Notes**: Available in [docs/video_presentation_script.md](docs/video_presentation_script.md).
+- **Presentation Link**: *(Paste your recorded video URL here)*
 
 ---
 

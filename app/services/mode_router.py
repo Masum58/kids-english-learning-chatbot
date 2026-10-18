@@ -1,5 +1,28 @@
-"""Mode Router: shishu ekhon ki chay? Rule-based, fast (~ms), explain kora jay.
-Priority: correct answer > emotion/stuck > option tap > play > learn > greeting > question > answer > chat"""
+"""Child Mode & Mood Detection Router.
+
+What this file does:
+    Detects the child's interaction mode, emotional state, or cognitive intent in
+    under 2 milliseconds. Categorizes input into four primary modes:
+        - 'learning': Active curriculum quizzes and answers.
+        - 'support': Comforting distress or providing scaffolded hints when stuck.
+        - 'engagement': Playful micro-games, songs, and rhymes.
+        - 'conversation': Curious questions and friendly chit-chat.
+
+Decision Priority:
+    1. Correct answer match (if a quiz question is pending)
+    2. Negative emotion / feeling stuck (support mode takes priority over drills)
+    3. Option tap (distractor options count as answers)
+    4. Explicit play intent or continuing a game
+    5. Learn intent
+    6. Greetings / check-ins / topic change
+    7. Curious questions ("Why?", "How?")
+    8. Fallback to general conversational chat
+
+Connections with other files:
+    - app/data/lessons.py: Looks up active Question objects via QUESTIONS_BY_ID.
+    - app/services/learning_engine.py: Uses normalize(), is_correct(), and is_struggling().
+    - app/services/orchestrator.py: Calls detect() on every non-flagged message to route turns.
+"""
 import re
 from dataclasses import dataclass
 
@@ -8,7 +31,7 @@ from app.services.learning_engine import LearnerState, LearningEngine, is_correc
 
 LEARNING, CONVERSATION, ENGAGEMENT, SUPPORT = "learning", "conversation", "engagement", "support"
 
-# reason constants (orchestrator o use kore)
+# Explanatory reason constants passed back to client
 GREETING = "greeting"
 CHAT_OPENER = "chat_opener"
 STUCK_REASON = "child_stuck"
@@ -39,6 +62,14 @@ _engine = LearningEngine()
 
 @dataclass(frozen=True)
 class Decision:
+    """Represents the mode routing decision for the current turn.
+
+    Attributes:
+        mode: The detected operational mode (learning, conversation, engagement, support).
+        reason: Machine-readable explanation tag describing why this mode was chosen.
+        is_answer: True if the child's message should be evaluated as a lesson answer.
+        emotion: Identified emotional state (e.g., 'sad', 'angry', 'happy') or None.
+    """
     mode: str
     reason: str
     is_answer: bool = False
@@ -57,13 +88,29 @@ def _negative_emotion(t: str) -> str | None:
 
 
 def _answer(state: LearnerState, previous_mode: str) -> Decision:
-    # porpor 3 ta bhul hole ekbar support dei, tarpor abar chesta korte dei
+    # If child has missed 3 in a row, intervene with support mode once before grading further
     if _engine.is_struggling(state) and previous_mode != SUPPORT:
         return Decision(SUPPORT, STRUGGLING)
     return Decision(LEARNING, "answered_pending_question", is_answer=True)
 
 
 def detect(text: str, state: LearnerState, previous_mode: str = CONVERSATION) -> Decision:
+    """Detects the child's active mode, intent, and emotional state.
+
+    What it does:
+        Applies hierarchical rules to classify the child's input. Balances educational
+        progress with emotional awareness, ensuring stuck or distressed children receive
+        comfort rather than relentless quiz grading.
+
+    Args:
+        text (str): Raw message string sent by the child.
+        state (LearnerState): Current learning state including any pending question.
+        previous_mode (str): Mode active during the previous turn (default 'conversation').
+
+    Returns:
+        Decision: Immutable Decision object containing mode, reason, is_answer, and emotion.
+    """
+
     t = normalize(text)
     words = " ".join(re.findall(r"[a-z]+", t))
     tokens = words.split()

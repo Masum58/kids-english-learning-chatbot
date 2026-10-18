@@ -1,4 +1,27 @@
-"""Orchestrator: puro flow ek jaygay. validate -> load -> safety -> mode -> respond -> save."""
+"""Central Conversational & Pedagogical Orchestrator.
+
+What this file does:
+    Coordinates the complete turn-by-turn request pipeline:
+        1. clean_input: Sanitizes whitespace and strips control characters.
+        2. repository.load: Loads short-term state and long-term word statistics.
+        3. safety.check: Zero-latency check for distress, PII, or memory probing.
+        4. mode_router.detect: Classifies intent into learning, conversation, engagement, or support.
+        5. Execution:
+            - If Learning: Evaluates answers or presents new questions via LearningEngine.
+            - If Engagement: Selects fun micro-games and rhymes via sel.
+            - If Support (stuck): Provides hints without punitive grading.
+            - If Support (emotion) or Conversation: Queries Gemini with 1.3s timeout and SEL fallback.
+        6. repository.save: Persists updated state and logs graded answers.
+
+Connections with other files:
+    - app/api/chat.py: Calls handle_message() for every incoming HTTP chat request.
+    - app/repository.py: Loads and commits ChatSession and WordStat records.
+    - app/services/safety.py: Evaluates safety flags.
+    - app/services/mode_router.py: Classifies modes and emotional states.
+    - app/services/learning_engine.py: Evaluates quizzes and handles level progression.
+    - app/services/llm.py: Generates natural language responses for open-ended chat.
+    - app/services/sel.py: Supplies empathetic responses, games, and fallback templates.
+"""
 import random
 import re
 from dataclasses import dataclass
@@ -16,6 +39,17 @@ rng = random.Random()
 
 @dataclass
 class ChatResult:
+    """Internal result container produced by the orchestrator.
+
+    Attributes:
+        reply: Response text for the child.
+        mode: Active interaction mode for this turn.
+        reason: Explanation tag for decision logging.
+        quick_replies: Array of suggested button options.
+        level: Current pedagogical level (1, 2, or 3).
+        progress: Progress dictionary containing answered, correct, and target counts.
+        llm_used: True if Gemini generated the reply, False if handled by rules/templates.
+    """
     reply: str
     mode: str
     reason: str
@@ -26,6 +60,14 @@ class ChatResult:
 
 
 def clean_input(text: str) -> str:
+    """Sanitizes raw user input by stripping control characters and collapsing whitespace.
+
+    Args:
+        text (str): Raw string message submitted by the user.
+
+    Returns:
+        str: Cleaned, whitespace-collapsed string.
+    """
     return re.sub(r"\s+", " ", re.sub(r"[\x00-\x1f\x7f]", " ", text)).strip()
 
 
@@ -43,6 +85,23 @@ def _with_menu(reply: str, state) -> tuple[str, list[str]]:
 
 
 async def handle_message(db: Session, session_id: str, text: str) -> ChatResult:
+    """Executes the complete end-to-end processing pipeline for a chat turn.
+
+    What it does:
+        Sanitizes text, loads child session state, checks safety filters, routes the
+        appropriate mode, evaluates learning quizzes or queries the LLM with fallback,
+        saves all updates to PostgreSQL, and returns a ChatResult.
+
+    Args:
+        db (Session): Active SQLAlchemy database session.
+        session_id (str): Unique session identifier for the child.
+        text (str): Incoming message text from the child.
+
+    Returns:
+        ChatResult: Dataclass containing the bot's reply, mode, level, progress,
+                    interactive choices, and telemetry metadata.
+    """
+
     text = clean_input(text)
     row, state = repository.load(db, session_id)
     previous_mode, level_before = row.mode, state.level

@@ -1,9 +1,34 @@
-"""L1/L2/L3 er shob proshno. Content ekhane, logic learning_engine.py te."""
+"""Pedagogical Curriculum & Lesson Bank (Levels 1, 2, 3).
+
+What this file does:
+    Stores the structured early-childhood English curriculum data for children under 7.
+    Contains vocabulary, visual emoji cues, hints, options, and accepted answers
+    separated into Level 1 (Single words), Level 2 (Mini fill-in sentences), and
+    Level 3 (Conversational responses & basic syntax).
+
+Connections with other files:
+    - app/services/learning_engine.py: Uses QUESTIONS_BY_LEVEL to select next questions,
+      re-introduce weak words, and evaluate child answers.
+    - app/services/orchestrator.py: Uses QUESTIONS_BY_ID to look up hints when a child
+      struggles or asks for help in Support mode.
+"""
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class Question:
+    """Represents a single pedagogical lesson question.
+
+    Attributes:
+        id: Unique identifier string for the question (e.g., 'l1_cat').
+        level: Pedagogical level (1 = single words, 2 = cloze sentences, 3 = conversational).
+        word: The core vocabulary word being taught (used for weak-word tracking).
+        prompt: Display question asked to the child.
+        options: Choices presented as clickable buttons or emojis.
+        answer: The exact primary correct answer string matching one of the options.
+        hint: Encouraging clue shown if the child answers incorrectly or asks for help.
+        also_accept: Alternative acceptable strings if the child types words instead of clicking.
+    """
     id: str
     level: int
     word: str                       # weak-word tracking er jonno
@@ -12,6 +37,7 @@ class Question:
     answer: str                     # options er moddhe thakte hobe
     hint: str
     also_accept: tuple[str, ...] = ()   # shishu type korle onno je uttor gulo thik
+
 
 
 # L1: shobdo chena (emoji dekhe)

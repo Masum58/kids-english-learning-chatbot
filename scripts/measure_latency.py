@@ -1,6 +1,17 @@
-"""End-to-end latency measurement. Usage:
+"""End-to-End Latency Measurement & Performance Verification Script.
+
+What this file does:
+    Sends benchmark batches of requests across 6 distinct scenarios (deterministic rule path
+    and LLM path) to verify that end-to-end response times strictly adhere to the project's
+    sub-2-second (<2000ms) performance SLA.
+
+Usage:
     python scripts/measure_latency.py --url http://localhost:8000
-    python scripts/measure_latency.py --url https://<live-url> --n 50 --llm-n 10
+    python scripts/measure_latency.py --url https://<live-url>.onrender.com --n 30 --llm-n 10
+
+Connections with other files:
+    - app/api/chat.py: Targets the '/chat' endpoint and records server latency_ms alongside wall time.
+    - README.md: The markdown table output from this script is documented as proof in the README.
 """
 import argparse
 import statistics
@@ -20,11 +31,32 @@ SCENARIOS = [
 
 
 def percentile(values: list[float], p: float) -> float:
+    """Calculates the p-th percentile from a list of float measurements.
+
+    Args:
+        values (list[float]): Collection of latency numbers in milliseconds.
+        p (float): Desired percentile rank (e.g. 95.0 for p95).
+
+    Returns:
+        float: Latency value at the given percentile rank.
+    """
     s = sorted(values)
     return s[min(len(s) - 1, int(len(s) * p / 100))]
 
 
 def run(client: httpx.Client, base: str, message: str, n: int, delay: float):
+    """Executes a repeated benchmark test for a single conversational scenario.
+
+    Args:
+        client (httpx.Client): HTTP client used for requests.
+        base (str): Base URL of the target server.
+        message (str): Text prompt to submit in the request body.
+        n (int): Number of iterations to run.
+        delay (float): Delay in seconds between calls (to respect rate limits for LLM).
+
+    Returns:
+        tuple: (wall_latencies, server_latencies, llm_hit_count, error_count)
+    """
     wall, server, llm_hits, errors = [], [], 0, 0
     for _ in range(n):
         start = time.perf_counter()
@@ -41,6 +73,7 @@ def run(client: httpx.Client, base: str, message: str, n: int, delay: float):
         if delay:
             time.sleep(delay)
     return wall, server, llm_hits, errors
+
 
 
 def main():

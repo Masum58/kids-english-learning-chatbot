@@ -1,4 +1,16 @@
-"""SEL + fallback template. LLM fail korle ba deterministic hote hole ei gulo kaj kore."""
+"""Social and Emotional Learning (SEL) & Deterministic Fallback Templates.
+
+What this file does:
+    Provides curated, pedagogically sound SEL responses for children under 7:
+        - Emotional awareness, validation, and calming deep breaths (sad, angry, scared).
+        - Non-punitive encouragement when stuck or struggling ("That's okay! Learning takes time").
+        - Playful engagement activities (animal sounds, clapping, rhymes).
+        - Ultra-fast fallback replies if the LLM times out or is offline.
+
+Connections with other files:
+    - app/services/orchestrator.py: Uses these templates for Support and Engagement modes,
+      and as the deterministic fallback whenever LLM generation exceeds 1.3s.
+"""
 
 GREETING = "Hi! 👋 I'm Teddy, your English friend! 🧸\nWhat do you want to do?"
 CHAT_OPENER = "Let's chat! 💬 Ask me anything. Try: \"Why is the sky blue?\""
@@ -11,7 +23,20 @@ ENGAGEMENT_BUTTONS = ["🔁 Again", "📚 Learn", "💬 Chat"]
 
 
 def menu(has_question: bool) -> list[str]:
+    """Generates the appropriate quick reply menu for the child.
+
+    What it does:
+        Returns a simplified button menu. If a quiz question is currently paused,
+        prioritizes 'Keep learning' so the child can smoothly resume.
+
+    Args:
+        has_question (bool): True if there is a pending quiz question waiting.
+
+    Returns:
+        list[str]: Array of button label strings to present to the user.
+    """
     return list(MENU_WITH_QUESTION if has_question else MENU)
+
 
 
 # Emotion naming + validation + ekta chhoto kaj (breathing / boro keu / khela)

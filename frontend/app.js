@@ -1,3 +1,21 @@
+/**
+ * Teddy English Frontend Application Controller.
+ *
+ * What this file does:
+ *   Manages the interactive child web interface:
+ *     - Communicates with the backend POST /chat endpoint.
+ *     - Maintains client-side session identity in localStorage.
+ *     - Displays child-friendly picture cards and emoji options for Levels 1-3.
+ *     - Triggers celebration effects (star progress bar, confetti animations).
+ *     - Provides voice read-aloud functionality using the HTML5 SpeechSynthesis API.
+ *
+ * Connections with other files:
+ *   - frontend/index.html: Provides the DOM elements manipulated by this script.
+ *   - frontend/styles.css: Supplies styling, bear animations, and layout classes.
+ *   - app/api/chat.py: The backend REST endpoint this script communicates with.
+ */
+
+// Dynamically use same-origin relative path when served over http/https; fallback to localhost for file://
 const API_URL = window.TEDDY_API_URL || (window.location.protocol.startsWith("http") ? "" : "http://localhost:8000");
 const sessionKey = "teddy-english-session";
 let sessionId = localStorage.getItem(sessionKey) || null;
@@ -19,6 +37,13 @@ const activityCopy = document.querySelector("#activity-copy");
 const activityChoices = document.querySelector("#activity-choices");
 let lastTeddyReply = "Hi, friend! I’m Teddy. What would you like to do today?";
 
+/**
+ * Appends a chat message bubble to the messages container.
+ *
+ * @param {string} text - Message text to display.
+ * @param {string} [kind="teddy"] - Message sender type ("teddy", "user", or "typing").
+ * @returns {HTMLElement} The created article element.
+ */
 function addMessage(text, kind = "teddy") {
   const item = document.createElement("article");
   item.className = `message ${kind}-message`;
@@ -28,7 +53,14 @@ function addMessage(text, kind = "teddy") {
   return item;
 }
 
+/**
+ * Renders quick reply buttons below the chat log for one-tap interaction.
+ *
+ * @param {string[]} items - Array of button label strings or emojis.
+ * @returns {void}
+ */
 function setQuickReplies(items) {
+
   quickReplies.replaceChildren();
   const isPictureQuestion = items.length >= 2 && items.length <= 4
     && items.every((item) => !/[A-Za-z0-9]/.test(item));
@@ -46,6 +78,12 @@ function setQuickReplies(items) {
   });
 }
 
+/**
+ * Renders the prominent visual learning card for Levels 1-3.
+ *
+ * @param {object} data - ChatResponse JSON payload containing reply and quick_replies.
+ * @returns {void}
+ */
 function renderLesson(data) {
   activityStage.hidden = false;
   activityCopy.textContent = data.reply;
@@ -63,11 +101,22 @@ function renderLesson(data) {
   quickReplies.classList.add("hidden");
 }
 
+/**
+ * Hides the lesson activity card when switching out of learning mode.
+ *
+ * @returns {void}
+ */
 function hideLesson() {
   activityStage.hidden = true;
   quickReplies.classList.remove("hidden");
 }
 
+/**
+ * Updates the 5-star progress meter and level badge on the UI.
+ *
+ * @param {object} progress - Contains { level, answered, correct, target }.
+ * @returns {void}
+ */
 function updateProgress(progress) {
   if (!progress) return;
   document.querySelector("#level-label").textContent = `Level ${progress.level}`;
@@ -76,6 +125,13 @@ function updateProgress(progress) {
   document.querySelectorAll("#stars span").forEach((star, index) => star.classList.toggle("earned", index < progress.correct));
 }
 
+/**
+ * Updates the animated mood state and status subtitle of the teddy bear avatar.
+ *
+ * @param {string} mood - Animation class ("happy", "caring", or "playful").
+ * @param {string} status - Subtitle text displayed below Teddy's name.
+ * @returns {void}
+ */
 function setTeddyMood(mood, status) {
   [teddyAvatar, heroBear].forEach((bear) => {
     bear.classList.remove("happy", "caring", "playful");
@@ -85,6 +141,11 @@ function setTeddyMood(mood, status) {
   teddyStatus.innerHTML = `<i></i> ${status}`;
 }
 
+/**
+ * Creates celebratory confetti animations when a child succeeds or levels up.
+ *
+ * @returns {void}
+ */
 function celebrate() {
   const colors = ["#ff7fad", "#ffc94b", "#61c7e8", "#8b70f1", "#65d7a4"];
   for (let index = 0; index < 42; index += 1) {
@@ -99,6 +160,12 @@ function celebrate() {
   }
 }
 
+/**
+ * Inspects bot response text and operational mode to determine the appropriate mood.
+ *
+ * @param {object} data - The ChatResponse object from the server.
+ * @returns {[string, string]} Tuple of [moodClass, statusText].
+ */
 function responseMood(data) {
   const reply = data.reply.toLowerCase();
   if (data.mode === "support") return ["caring", "I’m here with you 💛"];
@@ -110,6 +177,11 @@ function responseMood(data) {
   return ["happy", "Ready to learn with you"];
 }
 
+/**
+ * Reads Teddy's most recent reply out loud using the browser SpeechSynthesis API.
+ *
+ * @returns {void}
+ */
 function speakLastReply() {
   if (!("speechSynthesis" in window)) {
     showError("Listening is not available in this browser.");
@@ -129,12 +201,25 @@ function speakLastReply() {
   window.speechSynthesis.speak(speech);
 }
 
+/**
+ * Displays a temporary error or warning notification toast at the bottom of the screen.
+ *
+ * @param {string} message - Text notification to display.
+ * @returns {void}
+ */
 function showError(message) {
   toast.textContent = message;
   toast.classList.add("show");
   window.setTimeout(() => toast.classList.remove("show"), 3500);
 }
 
+/**
+ * Submits user input to the backend POST /chat endpoint and updates interface state.
+ *
+ * @param {string} rawMessage - Message text or option selected by the user.
+ * @param {boolean} [isLessonChoice=false] - True if clicked from visual activity stage.
+ * @returns {Promise<void>}
+ */
 async function sendMessage(rawMessage, isLessonChoice = false) {
   const message = rawMessage.trim();
   if (!message || sendButton.disabled) return;
