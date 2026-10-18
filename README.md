@@ -12,10 +12,10 @@
 
 ## 🌐 Live Deployed Application
 
-- **Live URL**: `https://<YOUR-DEPLOYED-URL>.onrender.com` *(See Deployment section below)*
+- **Live URL**: `https://<YOUR-DEPLOYED-URL>`
 - **Interactive UI**: Full web experience with audio read-aloud, responsive emoji cards, level progression, and confetti celebrations.
-- **Interactive API Documentation**: `https://<YOUR-DEPLOYED-URL>.onrender.com/docs` (Swagger UI)
-- **Health Check**: `https://<YOUR-DEPLOYED-URL>.onrender.com/health`
+- **Interactive API Documentation**: `https://<YOUR-DEPLOYED-URL>/docs` (Swagger UI)
+- **Health Check**: `https://<YOUR-DEPLOYED-URL>/health`
 
 ---
 
@@ -165,30 +165,6 @@ python scripts/measure_latency.py --url http://localhost:8000 --n 30 --llm-n 10
 
 ---
 
-## 🚢 Deployment Guide
-
-The application is bundled so that FastAPI serves both the REST API and the interactive HTML5 frontend from a single web service.
-
-### 1. Deploy on Render (One-Click with render.yaml)
-
-1. Fork or push this repository to your GitHub account.
-2. Sign in to [Render](https://render.com).
-3. Click **New +** → **Blueprint**.
-4. Select your `kids-english-learning-chatbot` repository.
-5. Render detects `render.yaml` and provisions:
-   - **teddy-postgres** (Managed PostgreSQL database)
-   - **teddy-english-chatbot** (FastAPI Docker Web Service)
-6. Under Environment Variables, input your `GEMINI_API_KEY`.
-7. Click **Apply**. Once built, your live URL will be active at `https://teddy-english-chatbot.onrender.com`.
-
-### 2. Alternative Cloud Database (Neon / Supabase) + Railway / Render
-If you use a free managed Postgres database like [Neon](https://neon.tech):
-- Set `DATABASE_URL`: `postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require`
-- Set `GEMINI_API_KEY`: Your Google AI Studio key
-- Deploy with the included `Dockerfile` or `Procfile`.
-
----
-
 ## 📡 API Reference
 
 ### `POST /chat`
@@ -230,21 +206,6 @@ Verifies database connectivity and service readiness.
   "database": "connected"
 }
 ```
-
----
-
-## 👥 GitHub Collaborators
-
-As requested in the project brief, repository collaboration access is configured for:
-- `farzana@sharif.com`
-- `mashrur@sharif.com`
-
----
-
-## 🎥 2-Minute Video Presentation
-
-A concise walkthrough video covering problem statement, pedagogical architecture, child safety, SEL, latency trade-offs, and live demo is available at:
-- **Presentation Link**: *(Paste your recorded video URL here)*
 
 ---
 
