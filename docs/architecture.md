@@ -97,8 +97,8 @@ The project contract strictly mandates an **end-to-end response latency under 2.
 | Mode & State Detection | < 2 ms | < 2 ms | Heuristic token matching & active state lookup |
 | Pedagogical Engine | < 1 ms | - | In-memory vocabulary trees & mastery counters |
 | PostgreSQL Read/Write | 5–15 ms | 5–15 ms | Indexed lookup on `session_id`, connection pool |
-| Google Gemini 2.5 Flash-Lite | - | 350–900 ms | Lightweight model, strict generation limits |
-| **LLM Hard Timeout** | - | **1.3 seconds max** | Asynchronous deadline via `asyncio.wait_for` |
+| Google Gemini 3.5 Flash-Lite | - | 450–950 ms | Lightweight model, strict generation limits |
+| **LLM Hard Timeout** | - | **1.5 seconds max** | Asynchronous deadline via `asyncio.wait_for` |
 | Fallback Template Generator | - | < 1 ms | Deterministic empathetic SEL responses |
 | **Total End-to-End Latency** | **< 60 ms** | **< 1,450 ms** | **Guaranteed < 2,000 ms SLA** |
 
@@ -118,8 +118,8 @@ sequenceDiagram
     API->>Router: Safety Check & Mode Detection (<1ms)
     
     alt Needs Dynamic LLM (Conversation / SEL Empathy)
-        Router->>LLM: Generate response (timeout: 1.3s)
-        alt LLM Responds within 1.3s
+        Router->>LLM: Generate response (timeout: 1.5s)
+        alt LLM Responds within 1.5s
             LLM-->>API: Clean, friendly response (~500ms)
         else LLM Timed Out or Error
             LLM-->>API: TimeoutException

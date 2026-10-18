@@ -12,10 +12,10 @@
 
 ## 🌐 Live Deployed Application
 
-- **Live URL**: `https://<YOUR-DEPLOYED-URL>`
+- **Live URL**: `https://kids-english-learning-chatbot.onrender.com`
 - **Interactive UI**: Full web experience with audio read-aloud, responsive emoji cards, level progression, and confetti celebrations.
-- **Interactive API Documentation**: `https://<YOUR-DEPLOYED-URL>/docs` (Swagger UI)
-- **Health Check**: `https://<YOUR-DEPLOYED-URL>/health`
+- **Interactive API Documentation**: `https://kids-english-learning-chatbot.onrender.com/docs` (Swagger UI)
+- **Health Check**: `https://kids-english-learning-chatbot.onrender.com/health`
 
 ---
 
@@ -57,8 +57,8 @@ Children under 7 cannot sustain continuous educational drills. Teddy dynamically
 
 Teddy achieves end-to-end response times well under the 2-second SLA via a hybrid architecture:
 1. **Deterministic Rule Engine (p50: 5 ms)**: Routine learning turns, quick replies, safety filters, and game triggers execute instantaneously in under 10 milliseconds without invoking external models.
-2. **Google Gemini 2.5 Flash-Lite (p50: ~450–600 ms)**: Used selectively for open-ended conversation and empathetic SEL interactions.
-3. **Strict 1.3s Hard Timeout + Graceful Fallback**: If LLM generation exceeds 1.3 seconds, the orchestrator instantly falls back to curated SEL response templates, guaranteeing that end-to-end latency never breaches the 2.0-second limit.
+2. **Google Gemini 3.5 Flash-Lite (p50: ~550–850 ms)**: Used selectively for open-ended conversation and empathetic SEL interactions.
+3. **Strict 1.5s Hard Timeout + Graceful Fallback**: If LLM generation exceeds 1.5 seconds, the orchestrator instantly falls back to curated SEL response templates, guaranteeing that end-to-end latency never breaches the 2.0-second limit.
 
 ### Benchmark Results (`scripts/measure_latency.py`)
 
